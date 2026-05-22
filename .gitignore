@@ -1,0 +1,31 @@
+node_modules
+dist
+cache
+artifacts/
+
+typechain-types
+coverage
+output
+*.tsbuildinfo
+*.log
+
+# Environment variables
+.env
+.env.local
+frontend/.env
+frontend/.env.local
+
+# IDE/System
+.vscode
+.idea
+.DS_Store
+
+# Debug/Temp files
+test_errors.txt
+ts_errors.txt
+test_errors.node.txt
+ui-playwright-result.pngPeosFi/
+AgentCreditScore.sol
+AgentFiCreditScore.sol
+
+.localdb

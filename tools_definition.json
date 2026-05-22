@@ -1,0 +1,701 @@
+[
+  {
+    "name": "create_user",
+    "description": "Register a new user with an email and wallet address. Performs ZK human verification mock.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "walletAddress": {
+          "type": "string",
+          "description": "User's primary wallet address (optional, will be generated if not provided)"
+        },
+        "zkProofData": {
+          "type": "string",
+          "description": "Mock ZK proof data for human verification"
+        }
+      },
+      "required": [
+        "email"
+      ]
+    },
+    "method": "POST",
+    "path": "/platform/users"
+  },
+  {
+    "name": "create_agent",
+    "description": "Create a new AI agent (lender or borrower) for a ZK-verified user.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "The ID of the registered user"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "lender",
+            "borrower"
+          ],
+          "description": "The role of the agent"
+        },
+        "ensName": {
+          "type": "string",
+          "description": "Target ENS name for the agent (must be valid ENS)"
+        },
+        "strategy": {
+          "type": "object",
+          "properties": {
+            "maxLoanAmount": {
+              "type": "number",
+              "default": 500
+            },
+            "minReputation": {
+              "type": "number",
+              "default": 25
+            },
+            "interestRate": {
+              "type": "number",
+              "default": 2.0
+            },
+            "repayAfterSeconds": {
+              "type": "number",
+              "default": 30
+            }
+          }
+        }
+      },
+      "required": [
+        "userId",
+        "role",
+        "ensName"
+      ]
+    },
+    "method": "POST",
+    "path": "/platform/agents"
+  },
+  {
+    "name": "post_lend_offer",
+    "description": "Lender agent posts an offer to the lending marketplace.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "lenderAgentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "maxAmountUsdc": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 1000
+        },
+        "minRepRequired": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "ratePct": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 10
+        }
+      },
+      "required": [
+        "lenderAgentId",
+        "maxAmountUsdc",
+        "minRepRequired",
+        "ratePct"
+      ]
+    },
+    "method": "POST",
+    "path": "/lending/offers"
+  },
+  {
+    "name": "request_borrow",
+    "description": "Borrower agent requests a loan from the marketplace.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "borrowerAgentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestedAmountUsdc": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "borrowerAgentId",
+        "requestedAmountUsdc"
+      ]
+    },
+    "method": "POST",
+    "path": "/lending/borrow"
+  },
+  {
+    "name": "get_borrow_quote",
+    "description": "Get a quote for a potential loan, including required collateral and interest.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "borrowerAgentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "amountUsdc": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "borrowerAgentId",
+        "amountUsdc"
+      ]
+    },
+    "method": "GET",
+    "path": "/lending/borrow/quote"
+  },
+  {
+    "name": "repay_loan",
+    "description": "Repay an active loan and report profit generated.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "matchId": {
+          "type": "integer"
+        },
+        "borrowerAgentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "profitGeneratedUsdc": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": [
+        "matchId",
+        "borrowerAgentId"
+      ]
+    },
+    "method": "POST",
+    "path": "/lending/repay"
+  },
+  {
+    "name": "get_agent_reputation",
+    "description": "Get the current reputation score and loan limits for an agent.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "agentId"
+      ]
+    },
+    "method": "GET",
+    "path": "/lending/agents/:agentId/rep"
+  },
+  {
+    "name": "fetch_open_offers",
+    "description": "Fetch all open lend offers from the marketplace, optionally filtered by minimum reputation and maximum amount.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "minRep": {
+          "type": "integer",
+          "description": "Minimum reputation required for the offer"
+        },
+        "maxAmount": {
+          "type": "number",
+          "description": "Maximum USDC amount allowed for the offer"
+        }
+      }
+    },
+    "method": "GET",
+    "path": "/lending/offers"
+  },
+
+  {
+    "name": "search_token",
+    "description": "Search for tokens across all supported blockchains by symbol or contract address. Returns matching tokens with their chain, address, and current USD price.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "symbol_or_address": {
+          "type": "string",
+          "description": "Token ticker symbol (e.g. 'USDC') or contract address."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results to return (default 5).",
+          "default": 5
+        }
+      },
+      "required": ["symbol_or_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/search_token"
+  },
+  {
+    "name": "get_token_price",
+    "description": "Get the real-time USD price for a specific token on a given chain.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "token_address": {
+          "type": "string",
+          "description": "Token contract address (e.g. '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913')."
+        },
+        "chain": {
+          "type": "string",
+          "description": "Blockchain network name (e.g. 'base', 'ethereum', 'arbitrum')."
+        }
+      },
+      "required": ["token_address", "chain"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_token_price"
+  },
+  {
+    "name": "get_balances",
+    "description": "Get all token balances for a wallet address across supported chains.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Ethereum-compatible wallet address (0x…)."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_balances"
+  },
+  {
+    "name": "get_portfolio",
+    "description": "Retrieve a comprehensive portfolio analysis for a wallet, including token balances, DeFi positions, staking positions, and total USD value.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Ethereum-compatible wallet address."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_portfolio"
+  },
+  {
+    "name": "analyze_wallet",
+    "description": "Perform a deep behavioral and risk analysis of a wallet, including trading patterns, risk score, and on-chain activity summary.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Ethereum-compatible wallet address."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/analyze_wallet"
+  },
+  {
+    "name": "get_pnl_report",
+    "description": "Get a profit-and-loss (PnL) report for a wallet over a chosen time period, including realized and unrealized gains/losses.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Ethereum-compatible wallet address."
+        },
+        "time_period": {
+          "type": "string",
+          "description": "Analysis window. Valid values: '7_days', '30_days', '90_days', '1_year'.",
+          "default": "30_days"
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_pnl_report"
+  },
+  {
+    "name": "get_swap_quote",
+    "description": "Fetch an optimal swap quote including estimated output amount, price impact, gas estimate, and routing path — without executing any transaction.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "from_chain": {
+          "type": "string",
+          "description": "Source chain (e.g. 'base', 'ethereum')."
+        },
+        "from_token": {
+          "type": "string",
+          "description": "Source token contract address."
+        },
+        "from_amount": {
+          "type": "string",
+          "description": "Amount of source token to swap (as a string, e.g. '100')."
+        },
+        "to_chain": {
+          "type": "string",
+          "description": "Destination chain (can be the same as from_chain)."
+        },
+        "to_token": {
+          "type": "string",
+          "description": "Destination token contract address."
+        },
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address used to calculate approvals / gas."
+        },
+        "slippage": {
+          "type": "number",
+          "description": "Maximum acceptable slippage in percent (e.g. 2.0 for 2%).",
+          "default": 2.0
+        }
+      },
+      "required": [
+        "from_chain", "from_token", "from_amount",
+        "to_chain", "to_token", "wallet_address"
+      ]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_swap_quote"
+  },
+  {
+    "name": "execute_swap",
+    "description": "Execute a real token swap on-chain via the Elsa pipeline system. Returns a pipeline_id that must be monitored with get_transaction_status. Set dry_run=true to simulate without sending a real transaction.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "from_chain": {
+          "type": "string",
+          "description": "Source chain."
+        },
+        "from_token": {
+          "type": "string",
+          "description": "Source token contract address."
+        },
+        "from_amount": {
+          "type": "string",
+          "description": "Amount to swap (string)."
+        },
+        "to_chain": {
+          "type": "string",
+          "description": "Destination chain."
+        },
+        "to_token": {
+          "type": "string",
+          "description": "Destination token contract address."
+        },
+        "wallet_address": {
+          "type": "string",
+          "description": "Executing wallet address."
+        },
+        "slippage": {
+          "type": "number",
+          "description": "Max slippage percent.",
+          "default": 2.0
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "If true, simulate only; no real transaction.",
+          "default": false
+        }
+      },
+      "required": [
+        "from_chain", "from_token", "from_amount",
+        "to_chain", "to_token", "wallet_address"
+      ]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/execute_swap"
+  },
+  {
+    "name": "create_limit_order",
+    "description": "Create a limit order via CoW Protocol. The order executes automatically when the market price reaches limit_price. Returns a pipeline_id for signing and monitoring.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "from_chain": {
+          "type": "string",
+          "description": "Chain for the order (e.g. 'ethereum')."
+        },
+        "from_token": {
+          "type": "string",
+          "description": "Token to sell — contract address."
+        },
+        "from_amount": {
+          "type": "string",
+          "description": "Amount to sell (string)."
+        },
+        "to_token": {
+          "type": "string",
+          "description": "Token to buy — contract address."
+        },
+        "limit_price": {
+          "type": "string",
+          "description": "Minimum price to accept for the swap (e.g. '0.0003' means sell when 1 unit of from_token = 0.0003 to_token)."
+        },
+        "wallet_address": {
+          "type": "string",
+          "description": "Order owner wallet address."
+        },
+        "valid_for_hours": {
+          "type": "integer",
+          "description": "Order expiry in hours (default 24).",
+          "default": 24
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Preview order without placing it.",
+          "default": false
+        }
+      },
+      "required": [
+        "from_chain", "from_token", "from_amount",
+        "to_token", "limit_price", "wallet_address"
+      ]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/create_limit_order"
+  },
+  {
+    "name": "get_limit_orders",
+    "description": "Fetch all active and historical limit orders for a wallet.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address whose orders to fetch."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_limit_orders"
+  },
+  {
+    "name": "cancel_limit_order",
+    "description": "Cancel a pending limit order. Returns a pipeline_id for the cancellation transaction that must be signed.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "Order ID to cancel (0x… hash from get_limit_orders)."
+        },
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address that owns the order."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Simulate cancellation without submitting.",
+          "default": false
+        }
+      },
+      "required": ["order_id", "wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/cancel_limit_order"
+  },
+  {
+    "name": "get_stake_balances",
+    "description": "View all active staking positions for a wallet across protocols (Lido, Rocket Pool, etc.) with current APY and staked amounts.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address to query staking positions for."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_stake_balances"
+  },
+  {
+    "name": "get_yield_suggestions",
+    "description": "Discover the best yield / farming opportunities tailored to a wallet's current holdings. Returns suggested protocols with estimated APY.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address whose holdings are used to generate suggestions."
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_yield_suggestions"
+  },
+  {
+    "name": "check_airdrop",
+    "description": "Check whether a wallet is eligible for a specific ELSA airdrop tranche and, if so, how many tokens it can claim.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "chain": {
+          "type": "string",
+          "description": "Chain where the airdrop is distributed (e.g. 'base')."
+        },
+        "tranche": {
+          "type": "integer",
+          "description": "Airdrop tranche number (minimum 1).",
+          "minimum": 1
+        },
+        "eoa_address": {
+          "type": "string",
+          "description": "Wallet address to check eligibility for."
+        }
+      },
+      "required": ["chain", "tranche", "eoa_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/check_airdrop"
+  },
+  {
+    "name": "claim_airdrop",
+    "description": "Create a pipeline to claim ELSA airdrop tokens for a specific tranche. Returns a pipeline_id — monitor with get_transaction_status and sign the transaction when it reaches 'sign_pending' status.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "chain": {
+          "type": "string",
+          "description": "Chain where the airdrop is distributed (e.g. 'base')."
+        },
+        "tranche": {
+          "type": "integer",
+          "description": "Airdrop tranche number (minimum 1).",
+          "minimum": 1
+        },
+        "eoa_address": {
+          "type": "string",
+          "description": "Wallet address that will receive the tokens."
+        },
+        "dry_run": {
+          "type": "boolean",
+          "description": "Preview the claim pipeline without executing.",
+          "default": false
+        }
+      },
+      "required": ["chain", "tranche", "eoa_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/claim_airdrop"
+  },
+  {
+    "name": "get_transaction_history",
+    "description": "Retrieve on-chain transaction history for a wallet address.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "wallet_address": {
+          "type": "string",
+          "description": "Wallet address to fetch history for."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of transactions to return (default 10).",
+          "default": 10
+        }
+      },
+      "required": ["wallet_address"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_transaction_history"
+  },
+  {
+    "name": "get_transaction_status",
+    "description": "Monitor the status of an Elsa pipeline and its tasks. Returns the current status ('pending', 'sign_pending', 'success', 'failed') and, when ready to sign, the tx_data payload for wallet signing.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pipeline_id": {
+          "type": "string",
+          "description": "Pipeline ID returned by execute_swap, claim_airdrop, etc."
+        }
+      },
+      "required": ["pipeline_id"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_transaction_status"
+  },
+  {
+    "name": "submit_transaction_hash",
+    "description": "After the user signs a transaction returned by get_transaction_status, submit the resulting transaction hash back to the pipeline so the next task can proceed.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Task ID from get_transaction_status response."
+        },
+        "tx_hash": {
+          "type": "string",
+          "description": "Signed transaction hash (0x…) returned by the RPC."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["submitted", "rejected"],
+          "description": "'submitted' if the tx was broadcast; 'rejected' if the user declined."
+        },
+        "error": {
+          "type": "string",
+          "description": "Error message — required only when status is 'rejected'."
+        }
+      },
+      "required": ["task_id", "tx_hash", "status"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/submit_transaction_hash"
+  },
+  {
+    "name": "get_gas_prices",
+    "description": "Fetch current gas prices (in gwei) for a specific blockchain network.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "chain": {
+          "type": "string",
+          "description": "Blockchain network (e.g. 'base', 'ethereum', 'arbitrum')."
+        }
+      },
+      "required": ["chain"]
+    },
+    "method": "POST",
+    "path": "/elsa/x402/get_gas_prices"
+  },
+  {
+    "name": "health_check",
+    "description": "Check if the Elsa X402 API server is healthy. Returns server version and X402 payment information.",
+    "parameters": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "method": "GET",
+    "path": "/elsa/x402/health"
+  }
+]
