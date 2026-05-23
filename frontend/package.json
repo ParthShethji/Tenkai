@@ -1,0 +1,37 @@
+{
+  "name": "agentfi-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.10",
+    "@tailwindcss/vite": "^4.2.1",
+    "@tanstack/react-query": "^5.90.21",
+    "agentfi-lending": "file:..",
+    "autoprefixer": "^10.4.27",
+    "framer-motion": "^12.36.0",
+    "lucide-react": "^0.577.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.0.0",
+    "recharts": "^3.8.0",
+    "tailwindcss": "^4.2.1",
+    "three": "^0.169.0",
+    "three-globe": "^2.42.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@types/three": "^0.183.1",
+    "@vitejs/plugin-react": "^4.5.2",
+    "playwright": "^1.58.2",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.6"
+  }
+}

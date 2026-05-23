@@ -1,0 +1,111 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #141a20;
+  background: #f3f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  width: min(1100px, 94vw);
+  margin: 24px auto 48px;
+  display: grid;
+  gap: 16px;
+}
+
+.hero {
+  background: linear-gradient(125deg, #0f2742 0%, #164873 52%, #16886a 100%);
+  color: #fff;
+  border-radius: 18px;
+  padding: 22px 24px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.hero p {
+  margin: 10px 0 0;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #d6e4f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(15, 39, 66, 0.08);
+}
+
+.card h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #c6d8ea;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #f9fcff;
+}
+
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #c6d8ea;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #f9fcff;
+  font-family: inherit;
+}
+
+button {
+  width: fit-content;
+  background: #0f5e9c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+pre {
+  margin: 0;
+  background: #0f1b2b;
+  color: #d8edf8;
+  padding: 12px;
+  border-radius: 10px;
+  overflow: auto;
+  font-size: 0.86rem;
+}
